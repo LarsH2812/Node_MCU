@@ -72,7 +72,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     </head>
     <body>
     <h1>Ayke heeft gelijk</h1>
-    %PLACEHOLDER%
+        %PLACEHOLDER%
     </body>
     <script>
         function toggleCheckbox(element){
@@ -87,24 +87,26 @@ const char index_html[] PROGMEM = R"rawliteral(
         function toggleCheckbox2(element){
             var xhr = new XMLHttpRequest();
             if(element.checked){
+                if(element.id!=0){document.getElementById("0").checked = false;}
+                if(element.id!=1){document.getElementById("1").checked = false;}
+                if(element.id!=2){document.getElementById("2").checked = false;}
+                if(element.id!=3){document.getElementById("3").checked = false;}
+                if(element.id!=4){document.getElementById("4").checked = false;}
+                if(element.id!=5){document.getElementById("5").checked = false;}
+                
                 xhr.open("GET", "/update?practicum="+element.id+"&state=1", true);
             } else {
                 xhr.open("GET","/update?practicum="+element.id+"&state=0", true);
             }
             xhr.send();
         }
-        setInterval( function(){
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET","/refresh",true);
-            xhr.send();
-        }, 1000);
 
     </script>
     </html>
 )rawliteral";
 
 String practState(int numPract){
-    if((state & (1<<numPract-1) ) != 0){
+    if((state & (1<<numPract) ) != 0){
         return "checked";
     } else return "";
     return ";";
@@ -119,7 +121,7 @@ String processor(const String& var){
     
 
     for(int i = 0; i < NO_PRACT; i++){
-        String practStateVal = practState(i-1); 
+        String practStateVal = practState(i); 
         buttons += "<p>Practicum #" + String(i+1) + " <label class=\"switch\"><input type=\"checkbox\" onchange=\"toggleCheckbox2(this)\" id=\"" + String(i) + "\" "+ practStateVal +"><span class=\"slider\"></span></label>\n";
     }
     return buttons;

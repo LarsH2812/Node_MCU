@@ -1,15 +1,19 @@
 #include <ESP8266WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncTCP.h>
+#include <ESP8266mDNS.h>
 #include "Page.h"
 
-const char* ap_ssid     = "vliegbeestAP";
+const char* ap_ssid     = "UAV|MeH2.A2";
 const char* ap_password = "aykeislief";
+const char* DomainName = "UAVControler";
 
-uint8_t max_connections = 4;
+#define serialDebug true
+
+uint8_t max_connections = 1;
 int current_connections = 0, new_connections = 0;
 
-
+String newHostName = "larsisawesome";
 
 uint64_t blink_t, blink_t_oud = 0, blink_dt;
 uint64_t tijd_t, tijd_t_oud = 0, tijd_dt;
@@ -20,14 +24,20 @@ void wifi_disconnect_check(){
   new_connections = WiFi.softAPgetStationNum();
   if(new_connections > current_connections){
     current_connections = new_connections;
-    Serial.print("a devices has connected, #connections: ");
-    Serial.println(new_connections);
+    if(serialDebug){
+      Serial.print("a devices has connected, #connections: ");
+      Serial.println(new_connections);
+    }
+    
     
   }
   if(new_connections < current_connections){
     current_connections = new_connections;
-    Serial.print("a devices has disconnected, #connections: ");
-    Serial.println(new_connections);
+    if(serialDebug){
+      Serial.print("a devices has disconnected, #connections: ");
+      Serial.println(new_connections);
+    }
+    
      
   }
   // if(current_connections >0){
@@ -42,17 +52,28 @@ AsyncWebServer server(80);
 void setup()
 {
   Serial.begin(115200);
-  Serial.println();
+  Serial.println(" ");
 
   if(WiFi.softAP(ap_ssid, ap_password,1,false,max_connections) == true){
     IPAddress IP = WiFi.softAPIP();
-    Serial.print("AP created with SSID");
-    Serial.println(ap_ssid);
-    Serial.print("AP IP address: ");
-    Serial.println(IP);
+    if(serialDebug){
+      Serial.print("[INFO] AP created with SSID");
+      Serial.println(ap_ssid);
+      Serial.print("[INFO] AP IP address: ");
+      Serial.println(IP);
+    }
+    
   } else {
-    Serial.println("Unable to create AP");
+    if(serialDebug){Serial.println("[ERROR] Unable to create AP");}
   }
+
+  if(!MDNS.begin(DomainName, WiFi.softAPIP())){
+    if(serialDebug){Serial.println("[ERROR] mDNS responder did not setup");}
+  } else {
+    if(serialDebug){Serial.println("[INFO] mDNS setup successful!");}
+  }
+
+  MDNS.addService("http", "tcp", 80);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN,HIGH);
 
@@ -62,13 +83,15 @@ void setup()
 
   server.on("/on", HTTP_GET, [](AsyncWebServerRequest *request){
     digitalWrite(LED_BUILTIN, LOW);
-    state |= (1<<8);
+    state |= (1<<7);
+    Serial.write(state);
     request->send_P(200, "text/html",index_html, processor);
   });
 
   server.on("/off", HTTP_GET, [](AsyncWebServerRequest *request){
     digitalWrite(LED_BUILTIN, HIGH);
-    state &= ~(1<<8);
+    state &= ~(1<<7);
+    Serial.write(state);
     request->send_P(200, "text/html",index_html, processor);
     
   });
@@ -86,27 +109,34 @@ void setup()
       inputParam2 = PARAM_INPUT_2;
 
       if(inputMessage2.toInt() == 1){
-      state &= ~(0b00111111);
-      state |= (1 << inputMessage1.toInt());
+        state &= ~(0b00111111);
+        state |= (1 << inputMessage1.toInt());
+        
       } else {
         state &= ~(1<<inputMessage1.toInt());
+        
       }
     }
-    Serial.print(inputMessage1+" | "+inputMessage2+" | ");Serial.println(state,BIN);
+    //if(serialDebug){Serial.print(inputMessage1+" | "+inputMessage2+" | ");Serial.println(state,BIN);}
+
+    Serial.write(state);
     request->send_P(200,"text/html",index_html, processor);
   });
 
   server.on("/refresh", HTTP_GET, [](AsyncWebServerRequest *request){
+    if(serialDebug){Serial.println("refresh");}
     request->send_P(200,"text/html",index_html,processor);
   });
 
   delay(2000); 
   server.begin();
+  if(serialDebug){Serial.println("HTTP server started");}
   
 }
 
 void loop() {
-   wifi_disconnect_check();
+  MDNS.update();
+  wifi_disconnect_check();
 
   // tijd_t = millis();
   // tijd_dt = tijd_t - tijd_t_oud;
