@@ -5,6 +5,7 @@
 
 const char* ap_ssid     = "vliegbeestAP";
 const char* ap_password = "aykeislief";
+String newHostname = "vliegbeest";
 
 uint8_t max_connections = 4;
 int current_connections = 0, new_connections = 0;
@@ -35,6 +36,7 @@ void wifi_disconnect_check(){
   // } else { blink(500);}
 }
 
+
 AsyncWebServer server(80);
 
 
@@ -45,6 +47,7 @@ void setup()
   Serial.println();
 
   if(WiFi.softAP(ap_ssid, ap_password,1,false,max_connections) == true){
+    WiFi.hostname(newHostname.c_str())
     IPAddress IP = WiFi.softAPIP();
     Serial.print("AP created with SSID");
     Serial.println(ap_ssid);
@@ -99,7 +102,7 @@ void setup()
   server.on("/refresh", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200,"text/html",index_html,processor);
   });
-
+  
   delay(2000); 
   server.begin();
   
