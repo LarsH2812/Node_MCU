@@ -166,3 +166,7 @@ void blink(int speed){
     blink_t_oud = blink_t;  
     }
 }
+
+
+
+

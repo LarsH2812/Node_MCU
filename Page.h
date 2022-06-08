@@ -2,7 +2,7 @@
 #define _PAGES_H_
 
 #define NO_PRACT 6
-byte state = 0b11000000;
+byte state = 0b01000000;
 
 const char* PARAM_INPUT_1 = "practicum";
 const char* PARAM_INPUT_2 = "state";
@@ -23,6 +23,9 @@ const char index_html[] PROGMEM = R"rawliteral(
         }
         p{
             font-size: 3.0rem;
+			margin-top: 5px;
+			margin-bottom: 5px;
+			
         }
         body{
             max-width: 600px;
@@ -32,8 +35,10 @@ const char index_html[] PROGMEM = R"rawliteral(
         .switch{
             position: relative;
             display: inline-block;
-            width: 120px;
-            height: 68px;
+            width: 92px;
+            height: 40px;
+			top: 3px;
+			bottom: 3px;
         }
         .switch input {
             display: none;
@@ -50,8 +55,8 @@ const char index_html[] PROGMEM = R"rawliteral(
         .slider:before {
             position: absolute; 
             content: ""; 
-            height: 52px; 
-            width: 52px; 
+            height: 24px; 
+            width: 24px; 
             left: 8px; 
             bottom: 8px; 
             background-color: #fff; 
@@ -71,7 +76,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     
     </head>
     <body>
-    <h1>Ayke heeft gelijk</h1>
+    <h2>UAV controler</h2>
         %PLACEHOLDER%
     </body>
     <script>
@@ -117,12 +122,12 @@ String processor(const String& var){
   if(var == "PLACEHOLDER"){
     String buttons = "";
 
-    buttons = "<h4>Power Switch</h4>\n<label class=\"switch\"><input type=\"checkbox\" onchange=\"toggleCheckbox(this)\" id=\"LED\"><span class=\"slider\"></span></label>\n";
+    buttons = "<p>Power Switch <label class=\"switch\"><input type=\"checkbox\" onchange=\"toggleCheckbox(this)\" id=\"LED\"><span class=\"slider\"></span></label></p>";
     
 
     for(int i = 0; i < NO_PRACT; i++){
         String practStateVal = practState(i); 
-        buttons += "<p>Practicum #" + String(i+1) + " <label class=\"switch\"><input type=\"checkbox\" onchange=\"toggleCheckbox2(this)\" id=\"" + String(i) + "\" "+ practStateVal +"><span class=\"slider\"></span></label>\n";
+        buttons += "<p>Practicum #" + String(i+1) + " <label class=\"switch\"><input type=\"checkbox\" onchange=\"toggleCheckbox2(this)\" id=\"" + String(i) + "\" "+ practStateVal +"><span class=\"slider\"></span></label></p>";
     }
     return buttons;
   }
