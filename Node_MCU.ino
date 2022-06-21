@@ -4,16 +4,14 @@
 #include <ESP8266mDNS.h>
 #include "Page.h"
 
-const char* ap_ssid     = "UAV|MeH2.A2";
+const char* ap_ssid     = "UAV | MeH2.A2";
 const char* ap_password = "aykeislief";
-const char* DomainName = "UAVControler";
+const char* DomainName = "UAV";
 
-#define serialDebug true
+#define serialDebug false
 
 uint8_t max_connections = 1;
 int current_connections = 0, new_connections = 0;
-
-String newHostName = "larsisawesome";
 
 uint64_t blink_t, blink_t_oud = 0, blink_dt;
 uint64_t tijd_t, tijd_t_oud = 0, tijd_dt;
@@ -40,9 +38,9 @@ void wifi_disconnect_check(){
     
      
   }
-  // if(current_connections >0){
-  //   blink(0);
-  // } else { blink(500);}
+  if(current_connections >0){
+    blink(0);
+  } else { blink(500);}
 }
 
 AsyncWebServer server(80);
@@ -70,7 +68,7 @@ void setup()
   if(!MDNS.begin(DomainName, WiFi.softAPIP())){
     if(serialDebug){Serial.println("[ERROR] mDNS responder did not setup");}
   } else {
-    if(serialDebug){Serial.println("[INFO] mDNS setup successful!");}
+    if(serialDebug){Serial.println("[INFO] mDNS setup successful!");Serial.println("[INFO] Controler accecible via UAV.local");}
   }
 
   MDNS.addService("http", "tcp", 80);
@@ -130,20 +128,13 @@ void setup()
 
   delay(2000); 
   server.begin();
-  if(serialDebug){Serial.println("HTTP server started");}
+  if(serialDebug){Serial.println("[INFO] HTTP server started");}
   
 }
 
 void loop() {
   MDNS.update();
   wifi_disconnect_check();
-
-  // tijd_t = millis();
-  // tijd_dt = tijd_t - tijd_t_oud;
-  // if(tijd_dt >= 200){
-  //   Serial.println(state,BIN);
-  //   tijd_t_oud = tijd_t;
-  // }
 }
 
 
