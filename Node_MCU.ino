@@ -22,6 +22,7 @@ void wifi_disconnect_check(){
   new_connections = WiFi.softAPgetStationNum();
   if(new_connections > current_connections){
     current_connections = new_connections;
+    Serial.write(state);
     if(serialDebug){
       Serial.print("a devices has connected, #connections: ");
       Serial.println(new_connections);
@@ -50,7 +51,7 @@ AsyncWebServer server(80);
 void setup()
 {
   Serial.begin(115200);
-  Serial.println(" ");
+  if(serialDebug){Serial.println(" ");}
 
   if(WiFi.softAP(ap_ssid, ap_password,1,false,max_connections) == true){
     IPAddress IP = WiFi.softAPIP();
